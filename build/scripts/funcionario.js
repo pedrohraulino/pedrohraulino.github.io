@@ -1,0 +1,1 @@
+class Funcionario{constructor(ಠ_ಠ509,ಠ_ಠ510,ಠ_ಠ511){this.ಠ_ಠ506=ಠ_ಠ509,this.ಠ_ಠ507=ಠ_ಠ510,this.ಠ_ಠ508=ಠ_ಠ511}}export{Funcionario};
