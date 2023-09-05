@@ -12,39 +12,43 @@ document.addEventListener('DOMContentLoaded', function () {
     const tabelaSection = document.getElementById('tabela');
 
     criarPlanilha.addEventListener('click', function () {
-        criarPlanilhaVazia();
-    });
 
-    function criarPlanilhaVazia() {
-        const cabecalho = [
-            ['Nome', 'Cargo', 'Salário'], // Cabeçalho da planilha
-        ];
-    
-        // Criar a <thead> antes de criar a planilha vazia
         const thead = document.createElement('thead');
+
         const tr = document.createElement('tr');
+
         const dadosColuna = ['Nome', 'Cargo', 'Salário'];
+
         for (const dadoColuna of dadosColuna) {
+
             const th = document.createElement('th');
+
             th.textContent = dadoColuna;
+
             tr.appendChild(th);
         }
-    
+
+
         thead.appendChild(tr);
+
         dadosDaTabela.appendChild(thead);
-    
-        const planilhaVazia = XLSX.utils.aoa_to_sheet(cabecalho);
+
+        const planilhaVazia = XLSX.utils.aoa_to_sheet([dadosColuna]);
+
         const areaVazia = XLSX.utils.book_new();
+
         XLSX.utils.book_append_sheet(areaVazia, planilhaVazia, 'Planilha Vazia');
-    
+
         const planilhaVaziaBlob = new Blob([s2ab(XLSX.write(areaVazia, { bookType: 'xlsx', type: 'binary' }))], {
             type: 'application/octet-stream'
         });
-    
+
         bemVindoSection.style.display = 'none';
+
         tabelaSection.style.display = 'block';
+
         dadosDaTabela.style.display = 'table';
-    }
+    });
 
     aquivoEnviado.addEventListener('change', function (event) {
         const file = event.target.files[0];
@@ -56,8 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
                 const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    
-                console.log(sheetData); // Exibir os dados lidos a partir do arquivo
     
                 preencheTabela(sheetData);
                 quickSort();
@@ -163,6 +165,8 @@ document.addEventListener('DOMContentLoaded', function () {
     
         tbody.appendChild(tr);
         atualizaTotalFuncionarios();
+        const totalSalario = calculaTotalSalario(); // Calcula a soma total dos salários
+        folhaSalarial.querySelector('h2').textContent = `${totalSalario}`;
     }
 
     function editarLinhas(linha) {
@@ -180,16 +184,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     function deletaLinha(linha) {
-        const celulaSalario = linha.cells[2]; // Assuming salary is in the third column
-        
-        // Extract the salary value from the cell
-        const valorSalario = parseFloat(celulaSalario.textContent.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
-        
-        // Remove the linha from the table
         linha.remove();
         
-        // Recalculate and update the total salary
-        const celualaSalarios = tbody.querySelectorAll('tr td:nth-child(3)'); // Column index for salary
+        const celualaSalarios = tbody.querySelectorAll('tr td:nth-child(3)');
         let totalSalario = 0;
     
         celualaSalarios.forEach(cell => {
@@ -202,34 +199,32 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     function preencheTabela(data) {
+        const thead = document.createElement('thead');
+        const thRow = document.createElement('tr');
+        const dadosColuna = ['Nome', 'Cargo', 'Salário'];
+    
+        for (const dadoColuna of dadosColuna) {
+            const th = document.createElement('th');
+            th.textContent = dadoColuna;
+            thRow.appendChild(th);
+        }
+    
+        thead.appendChild(thRow);
+        dadosDaTabela.appendChild(thead);
+    
+        // Adicione os dados ao corpo da tabela, evitando adicionar os cabeçalhos novamente
         for (let i = 0; i < data.length; i++) {
-            if (i === 0) {
-                const thead = document.createElement('thead');
-                const thRow = document.createElement('tr');
-                for (let cell of data[i]) {
-                    const th = document.createElement('th');
-                    th.textContent = cell;
-                    thRow.appendChild(th);
-                }
-                thead.appendChild(thRow);
-                dadosDaTabela.appendChild(thead);
-            } else {
+            if (i !== 0) {
                 const funcionario = new Funcionario(data[i][0], data[i][1], data[i][2]);
                 adicionarLinhaNaTabela(funcionario);
             }
         }
     
+        // Certifique-se de que a tabela seja visível
         dadosDaTabela.style.display = 'table';
-    
-        // Add event listeners to delete buttons
-        const deleteButtons = tbody.querySelectorAll('tr button');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const row = button.closest('tr');
-                deletaLinha(row);
-            });
-        });
     }
+    
+    
     
     function quickSort() {
     const linhas = Array.from(tbody.querySelectorAll('tr'));
@@ -255,8 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
             celulaSalario.textContent = `R$ ${valorSalario}`;
         }
     }
-    const totalSalario = calculaTotalSalario(); // Calcula a soma total dos salários
-    folhaSalarial.querySelector('h2').textContent = `${totalSalario}`;
     }
          
     function totalFuncionarios() {
@@ -304,5 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
             affixesStay: false
         });
     });
+
     
 });
